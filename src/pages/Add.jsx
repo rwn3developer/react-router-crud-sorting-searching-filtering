@@ -50,6 +50,7 @@ const Add = () => {
         setGender("");
         setSelectCourse([]);
         setDate("")
+        setStatus("")
     }
 
 

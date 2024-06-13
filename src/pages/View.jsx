@@ -6,18 +6,19 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const View = () => {
     const navigate = useNavigate();
-    let data = JSON.parse(localStorage.getItem('users')) || [];
+    let data = JSON.parse(localStorage.getItem('users')) ? JSON.parse(localStorage.getItem('users')) : [];
     const [record, setRecord] = useState(data);
     const [status, setStatus] = useState("");
     const [filterrecord, setFilterRecord] = useState([]);
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("");
+    const [course,setCourse] = useState([])
 
     const deleteUser = (id) => {
         let d = record.filter(val => val.id !== id);
         localStorage.setItem('users', JSON.stringify(d));
         toast.error("Record Deleted");
-        setRecord(d);
+        setFilterRecord(d);
     };
 
     useEffect(() => {
@@ -39,8 +40,35 @@ const View = () => {
             }
         }
 
+        if(course.length > 0){
+            console.log(course);
+            filtered = filtered.filter(val => course.some(c => val.course.includes(c)));
+            console.log(filtered);
+        }
+
         setFilterRecord(filtered);
-    }, [status, search, sort]);
+    }, [status, search, sort,course]);
+
+    // reset filter
+    const resetFilter = () => {
+        setFilterRecord(record)
+        setSearch("")
+        setSort("");
+        setStatus("")
+    }
+
+    //course wise filter record
+    const handleFilterCourse = (c,checked)=>{
+        let all = [...course];
+       if(checked){
+            all.push(c)
+       }else{
+            all = all.filter(val => val != c)
+       }
+       setCourse(all)
+    }
+
+    
 
     return (
         <>
@@ -54,29 +82,52 @@ const View = () => {
                             </Link>
                         </div>
                         <div className='row mb-3'>
-                            <div className="col-lg-4 mb-3">
+                            <div className="col-lg-3 mb-3">
                                 <select onChange={(e) => setStatus(e.target.value)} className='form-control' value={status}>
                                     <option value="">---select status---</option>
                                     <option value="active">Active</option>
                                     <option value="unactive">Deactive</option>
                                 </select>
                             </div>
-                            <div className='col-lg-4'>
+                            <div className='col-lg-3'>
                                 <form>
-                                    <input type="text" onChange={(e) => setSearch(e.target.value)} className='form-control' placeholder='search here' />
+                                    <input type="text" onChange={(e) => setSearch(e.target.value)} value={search} className='form-control' placeholder='search here' />
                                 </form>
                             </div>
-                            <div className='col-lg-4'>
+                            <div className='col-lg-3'>
                                 <select onChange={(e) => setSort(e.target.value)} className='form-control' value={sort}>
                                     <option value="">---select sorting---</option>
                                     <option value="asc">A-Z</option>
                                     <option value="dsc">Z-A</option>
                                 </select>
                             </div>
+                            <div className='col-lg-3'>
+                                <button onClick={(e) => resetFilter()} className='btn btn-danger'>Reset</button>
+                            </div>
+
+                            <div className='col-lg-6'>
+                                {
+                                    ["html", "css", "bootstrap", "js", "react js", "node js", "php", "angular", "python", "laravel"].map((c, index) => {
+                                        return (
+                                            <div key={++index} className="form-check form-check-inline">
+                                                <input className="form-check-input" type="checkbox" onChange={ (e) => handleFilterCourse(c,e.target.checked) } />
+                                                <label className="form-check-label" checked={c} htmlFor="inlineCheckbox1">{c}</label>
+                                            </div>
+                                        )
+                                    })
+                                }
+                            </div>
+
                         </div>
                         <table className="table">
                             <thead>
                                 <tr>
+                                    <th>
+                                        <button className='btn btn-danger btn-sm'>Delete</button>
+                                    </th>
+                                    <th>
+                                        <button className='btn btn-info btn-sm'>Status</button>
+                                    </th>
                                     <th scope="col">Srno</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Email</th>
@@ -91,11 +142,17 @@ const View = () => {
                                 {
                                     filterrecord.map((val, index) => (
                                         <tr key={val.id}>
+                                            <td>
+                                                <input type="checkbox" />
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" />
+                                            </td>
                                             <td>{index + 1}</td>
                                             <td>{val.name}</td>
                                             <td>{val.email}</td>
                                             <td>{val.gender}</td>
-                                            <td style={{ width: '300px' }}>{val.course.join(' , ')}</td>
+                                            <td style={{ width: '150px' }}>{val.course.join(' , ')}</td>
                                             <td>{val.date}</td>
                                             <td>
                                                 {
