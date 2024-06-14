@@ -12,7 +12,9 @@ const View = () => {
     const [filterrecord, setFilterRecord] = useState([]);
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("");
-    const [course,setCourse] = useState([])
+    const [course, setCourse] = useState([])
+    const [startDate,setStartDate] = useState("");
+    const [endDate,setEndDate] = useState("");
 
     const deleteUser = (id) => {
         let d = record.filter(val => val.id !== id);
@@ -40,14 +42,22 @@ const View = () => {
             }
         }
 
-        if(course.length > 0){
-            console.log(course);
+        if (course.length > 0) {
             filtered = filtered.filter(val => course.some(c => val.course.includes(c)));
             console.log(filtered);
         }
 
+        if(startDate && endDate){
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            filtered = filtered.filter(val => {
+                const date = new Date(val.date);
+                return date >= start && date <= end;
+            });
+        }
+
         setFilterRecord(filtered);
-    }, [status, search, sort,course]);
+    }, [status, search, sort, course,startDate,endDate]);
 
     // reset filter
     const resetFilter = () => {
@@ -55,20 +65,23 @@ const View = () => {
         setSearch("")
         setSort("");
         setStatus("")
+        setCourse([])
+        setStartDate("")
+        setEndDate("")
     }
 
     //course wise filter record
-    const handleFilterCourse = (c,checked)=>{
+    const handleFilterCourse = (c, checked) => {
         let all = [...course];
-       if(checked){
+        if (checked) {
             all.push(c)
-       }else{
+        } else {
             all = all.filter(val => val != c)
-       }
-       setCourse(all)
+        }
+        setCourse(all)
     }
 
-    
+
 
     return (
         <>
@@ -105,18 +118,29 @@ const View = () => {
                                 <button onClick={(e) => resetFilter()} className='btn btn-danger'>Reset</button>
                             </div>
 
+                            {/* course wise filter */}
                             <div className='col-lg-6'>
                                 {
                                     ["html", "css", "bootstrap", "js", "react js", "node js", "php", "angular", "python", "laravel"].map((c, index) => {
                                         return (
                                             <div key={++index} className="form-check form-check-inline">
-                                                <input className="form-check-input" type="checkbox" onChange={ (e) => handleFilterCourse(c,e.target.checked) } />
+                                                <input className="form-check-input" type="checkbox" checked={course.includes(c)} onChange={(e) => handleFilterCourse(c, e.target.checked)} />
                                                 <label className="form-check-label" checked={c} htmlFor="inlineCheckbox1">{c}</label>
                                             </div>
                                         )
                                     })
                                 }
                             </div>
+
+
+                            {/* date wise filter */}
+                            <div className='col-lg-6'>
+                                <div className='d-flex justify-content-around'>
+                                    <input type='date' className='form-control w-25' onChange={ (e) => setStartDate(e.target.value) } value={startDate} />
+                                    <input type='date' className='form-control w-25' onChange={ (e) => setEndDate(e.target.value) } value={endDate} />
+                                </div>
+                            </div>
+
 
                         </div>
                         <table className="table">
